@@ -13,6 +13,7 @@ import SplashScreen from './screens/SplashScreen';
 import HomeScreen from './screens/HomeScreen';  // Pastikan file ini ada dan benar
 import ProfileScreen from './screens/ProfileScreen';  // Pastikan file ini ada dan benar
 import RegisterScreen from './screens/RegisterScreen';  // Pastikan file ini ada dan benar
+import ImportExcelScreen from './screens/ImportExcelScreen';
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -29,6 +30,8 @@ function MainTabNavigator() {
             iconName = focused ? 'book' : 'book';
           } else if (route.name === 'Profile') {
             iconName = focused ? 'user' : 'user';
+          }else if (route.name === 'Import') {
+            iconName = focused ? 'upload' : 'upload';
           }
           return <Icon name={iconName} size={size} color={color} />;
         },
@@ -40,6 +43,7 @@ function MainTabNavigator() {
     >
       <Tab.Screen name="Home" component={HomeScreen} />
       <Tab.Screen name="Contacts" component={ContactListScreen} />
+      <Tab.Screen name="Import" component={ImportExcelScreen} />
       <Tab.Screen name="Profile" component={ProfileScreen} />
     </Tab.Navigator>
   );

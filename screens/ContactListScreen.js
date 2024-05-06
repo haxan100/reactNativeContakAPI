@@ -9,6 +9,16 @@ const ContactListScreen = ({ navigation}) => {
   const [contacts, setContacts] = useState([]);
   const [exportTombol, setExportTombol] = useState(true);
 
+    useEffect(() => {
+      const unsubscribe = navigation.addListener('focus', () => {
+        // Panggil fungsi untuk memuat ulang data kontak di sini
+        fetchContacts();
+      });
+  
+      return unsubscribe;
+    }, [navigation]);
+
+
   useEffect(() => {
     fetchContacts();
   }, []);
