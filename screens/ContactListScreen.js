@@ -4,16 +4,18 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import RNFetchBlob from 'rn-fetch-blob';
 import API_BASE_URL from '../config/apiConfig';
 
-const ContactListScreen = ({ navigation }) => {
+const ContactListScreen = ({ navigation}) => {
+  
   const [contacts, setContacts] = useState([]);
+  const [exportTombol, setExportTombol] = useState(true);
 
   useEffect(() => {
     fetchContacts();
   }, []);
 
   const fetchContacts = async () => {
+    console.log(Date.now()) 
     const url = `${API_BASE_URL}contacts/`; // Menggunakan template string untuk menggabungkan URL dasar dengan endpoint spesifik
-    console.log(url)
     try {
       const token = await AsyncStorage.getItem('userToken');  // Ambil token dari AsyncStorage
       console.log("token=XXXXXXXXX", token);
@@ -27,11 +29,7 @@ const ContactListScreen = ({ navigation }) => {
         }
       });  
   
-      const jsonResponse = await response.json(); // Read the JSON only once and store it in jsonResponse
-      console.log("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx")
-      console.log("response JSON =>", jsonResponse);
-      console.log("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx")
-  
+      const jsonResponse = await response.json();  
       if (response.ok) {
         setContacts(jsonResponse.data);  // Use the jsonResponse directly
       } else {
@@ -42,7 +40,7 @@ const ContactListScreen = ({ navigation }) => {
       Alert.alert('Error', 'Failed to fetch contacts!');
     }
   };
-  
+
   const handleExport = async () => {
     const granted = await PermissionsAndroid.request(
       PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
@@ -60,13 +58,20 @@ const ContactListScreen = ({ navigation }) => {
     try {
       const token = await AsyncStorage.getItem('userToken');
       if (!token) throw new Error("Token not found");
-
       const url = `${API_BASE_URL}contacts/export`; 
-      let dirs = RNFetchBlob.fs.dirs;
+      const path = `${RNFetchBlob.fs.dirs.DownloadDir}/contacts${Date.now()}.xlsx`;
       RNFetchBlob.config({
-        fileCache: true,
-        path: RNFetchBlob.fs.dirs.CacheDir + '/contacts.xlsx'
-      })
+        path: path,
+        addAndroidDownloads: {
+          useDownloadManager: true,
+          notification: true,
+          title: `contacts${Date.now()}.xlsx`,
+          mime: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+          mediaScannable: true,
+          description: 'Downloading file',
+          path: path  // Menentukan jalur di sini mungkin tidak diperlukan atau dapat menyebabkan masalah
+        }
+      })  
       .fetch('GET', url, {
         Authorization: `Bearer ${token}`
       })
@@ -83,6 +88,61 @@ const ContactListScreen = ({ navigation }) => {
       Alert.alert('Export Failed', 'Unable to export contacts at this time.');
     }
   };
+  
+  const handleExports = async () => {
+    // Minta izin WRITE_EXTERNAL_STORAGE
+    const granted = await PermissionsAndroid.request(
+      PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
+      {
+        title: "Storage Permission Required",
+        message: "This app needs access to your storage to download files."
+      }
+    );
+  
+    if (granted !== PermissionsAndroid.RESULTS.GRANTED) {
+      Alert.alert('Error', 'Storage Permission Denied');
+      return;
+    }  
+    try {
+      const token = await AsyncStorage.getItem('userToken');
+      if (!token) {
+        throw new Error("Token not found");
+      }
+      const url = `${API_BASE_URL}contacts/export`;
+      const path = `${RNFetchBlob.fs.dirs.DownloadDir}/contacts.xlsx`;
+      RNFetchBlob.config({
+        path: path,
+        addAndroidDownloads: {
+          useDownloadManager: true,
+          notification: true,
+          title: `contacts.xlsx`,
+          mime: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+          mediaScannable: true,
+          description: 'Downloading file',
+          path: path  // Menentukan jalur di sini mungkin tidak diperlukan atau dapat menyebabkan masalah
+        }
+      })
+      .fetch('GET', url, {
+        Authorization: `Bearer ${token}`
+      })
+      .then((res) => {
+        setExportTombol(false)
+        console.log('File saved to ', res.path());
+        Alert.alert('Export Success', 'File has been downloaded to ' + res.path());
+        setTimeout(() => {
+          setExportTombol(true)
+        }, 5500);
+      })
+      .catch((error) => {
+        console.error('Error exporting contacts', error);
+        Alert.alert('Export Failed', `Unable to export contacts at this time: ${error.message}`);
+      });
+    } catch (error) {
+      console.error('Error', error);
+      Alert.alert('Export Failed', `Unable to export contacts at this time: ${error.message}`);
+    }
+  };
+  
 
   return (
     <View style={styles.container}>
@@ -104,9 +164,11 @@ const ContactListScreen = ({ navigation }) => {
       <TouchableOpacity style={styles.addButton} onPress={() => navigation.navigate('AddContact')}>
         <Text style={styles.buttonText}>Add New Contact</Text>
       </TouchableOpacity>
-      <TouchableOpacity style={styles.exportButton} onPress={handleExport}>
-        <Text style={styles.buttonText}>Export Contacts</Text>
-      </TouchableOpacity>
+      {exportTombol && (
+        <TouchableOpacity style={styles.exportButton} onPress={handleExport}>
+          <Text style={styles.buttonText}>Export Contacts</Text>
+        </TouchableOpacity>
+      )}
     </View>
   );
 
