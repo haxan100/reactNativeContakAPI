@@ -41,10 +41,10 @@ function MainTabNavigator() {
         inactiveTintColor: 'gray',
       }}
     >
-      <Tab.Screen name="Home" component={HomeScreen} />
-      <Tab.Screen name="Contacts" component={ContactListScreen} />
-      <Tab.Screen name="Import" component={ImportExcelScreen} />
-      <Tab.Screen name="Profile" component={ProfileScreen} />
+      <Tab.Screen name="Home" component={HomeScreen} options={{ headerShown: false }}/>
+      <Tab.Screen name="Contacts" component={ContactListScreen} options={{ headerShown: false }} />
+      <Tab.Screen name="Import" component={ImportExcelScreen} options={{ headerShown: false }} />
+      <Tab.Screen name="Profile" component={ProfileScreen} options={{ headerShown: false }} />
     </Tab.Navigator>
   );
 }
