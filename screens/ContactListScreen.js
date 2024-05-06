@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, FlatList, Button, StyleSheet, TouchableOpacity, Alert, PermissionsAndroid } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import RNFetchBlob from 'rn-fetch-blob';
+import API_BASE_URL from '../config/apiConfig';
 
 const ContactListScreen = ({ navigation }) => {
   const [contacts, setContacts] = useState([]);
@@ -11,26 +12,34 @@ const ContactListScreen = ({ navigation }) => {
   }, []);
 
   const fetchContacts = async () => {
+    const url = `${API_BASE_URL}contacts/`; // Menggunakan template string untuk menggabungkan URL dasar dengan endpoint spesifik
+    console.log(url)
     try {
       const token = await AsyncStorage.getItem('userToken');  // Ambil token dari AsyncStorage
+      console.log("token=XXXXXXXXX", token);
       if (!token) throw new Error("Token not found");
-      
-      const response = await fetch('http://103.127.135.203:3000/api/contacts', {
+  
+      const response = await fetch(url, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
         }
       });  
+  
+      const jsonResponse = await response.json(); // Read the JSON only once and store it in jsonResponse
+      console.log("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx")
+      console.log("response JSON =>", jsonResponse);
+      console.log("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx")
+  
       if (response.ok) {
-        const data = await response.json();
-        setContacts(data);  // Pastikan ini di-set dengan benar
+        setContacts(jsonResponse.data);  // Use the jsonResponse directly
       } else {
         throw new Error('Failed to fetch contacts');
       }
     } catch (error) {
-      console.error('Error fetching contacts', error);
-      Alert.alert('Error', 'Failed to fetch contacts');
+      console.error('Error fetching contacts?', error);
+      Alert.alert('Error', 'Failed to fetch contacts!');
     }
   };
   
@@ -52,7 +61,7 @@ const ContactListScreen = ({ navigation }) => {
       const token = await AsyncStorage.getItem('userToken');
       if (!token) throw new Error("Token not found");
 
-      const url = 'http://103.127.135.203:3000/api/contacts/export'; 
+      const url = `${API_BASE_URL}contacts/export`; 
       let dirs = RNFetchBlob.fs.dirs;
       RNFetchBlob.config({
         fileCache: true,

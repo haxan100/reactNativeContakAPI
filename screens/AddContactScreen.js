@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import API_BASE_URL from '../config/apiConfig';
 
 const AddContactScreen = ({ navigation }) => {
   const [name, setName] = useState('');
@@ -18,7 +19,9 @@ const AddContactScreen = ({ navigation }) => {
 
   const addContact = async () => {
     try {
-      const response = await fetch('http://103.127.135.203:3000/api/contacts/addContact', {
+      const url = `${API_BASE_URL}contacts/addContact`; // Menggunakan template string untuk menggabungkan URL dasar dengan endpoint spesifik
+
+      const response = await fetch(url, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -26,7 +29,7 @@ const AddContactScreen = ({ navigation }) => {
         },
         body: JSON.stringify({ name, phone, email })
       });
-      console.log(response)
+      console.log("response=>>>>>",response)
       if (response.ok) {
         Alert.alert("Success", "Contact added successfully!");
         navigation.goBack(); // Go back to contact list after adding
@@ -34,7 +37,7 @@ const AddContactScreen = ({ navigation }) => {
         throw new Error('Failed to add contact');
       }
     } catch (error) {
-      console.error('Failed to add contact', error);
+      console.error('APAAN ERORNYA =>>>>>>>>>>>>>>>>', error);
       Alert.alert("Error", "Failed to add contact");
     }
   };
@@ -46,13 +49,16 @@ const AddContactScreen = ({ navigation }) => {
         placeholder="Enter Name"
         value={name}
         onChangeText={setName}
+        placeholderTextColor="#666"  // Light gray color for placeholder
         style={styles.input}
       />
       <Text style={styles.label}>Phone:</Text>
       <TextInput
         placeholder="Enter Phone"
         value={phone}
+        
         onChangeText={setPhone}
+        placeholderTextColor="#666"  // Light gray color for placeholder
         style={styles.input}
       />
       <Text style={styles.label}>Email:</Text>
@@ -60,6 +66,7 @@ const AddContactScreen = ({ navigation }) => {
         placeholder="Enter Email"
         value={email}
         onChangeText={setEmail}
+        placeholderTextColor="#666"  // Light gray color for placeholder
         style={styles.input}
       />
       <TouchableOpacity style={styles.button} onPress={addContact}>
@@ -76,12 +83,20 @@ const styles = StyleSheet.create({
     backgroundColor: '#f5f5f5'
   },
   input: {
-    marginBottom: 15,
+    width: '100%',
+    marginBottom: 12,
     borderWidth: 1,
-    borderColor: '#cccccc',
-    padding: 10,
+    borderColor: '#ccc',
+    padding: 15,
     borderRadius: 5,
-    backgroundColor: 'white'
+    backgroundColor: '#fff',
+    fontSize: 16,  // Increase font size for better readability
+    color: '#333',  // Dark color for input text
+    shadowColor: '#000',  // Shadow for depth
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 6,
+    elevation: 3
   },
   label: {
     fontSize: 16,

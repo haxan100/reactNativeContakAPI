@@ -1,16 +1,23 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, KeyboardAvoidingView, Platform } from 'react-native';
+import { useEffect, useRef } from 'react';
+
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, KeyboardAvoidingView, Platform,Alert,Animated } from 'react-native';
 import API_BASE_URL from '../config/apiConfig';
 
 const LoginScreen = ({ navigation }) => {
+  const rotation = useRef(new Animated.Value(0)).current; // Animated value for rotation
+
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
 
   const handleLogin = async () => {
     try {
       const url = `${API_BASE_URL}auth/login`; // Menggunakan template string untuk menggabungkan URL dasar dengan endpoint spesifik
-      console.log(url)
+      if(username==""||password==""){
+        alert("MASUKAN USERNAME DAN PASSWORDNYA")
+        return false
+      }
       const response = await fetch(url, {
         method: 'POST',
         headers: {
@@ -24,7 +31,7 @@ const LoginScreen = ({ navigation }) => {
 
       const json = await response.json();
       if (response.ok) {
-        await AsyncStorage.setItem('userToken', json.token);  // Save the token to AsyncStorage
+        await AsyncStorage.setItem('userToken', json.data.token);  // Save the token to AsyncStorage
         navigation.navigate('Main'); // Navigate to Main tabs on success
       } else {
         throw new Error(json.message || 'Login failed');
@@ -34,10 +41,29 @@ const LoginScreen = ({ navigation }) => {
       alert(error.message || 'Login failed');
     }
   };
+  const animateLogo = () => {
+    // Continuous rotation animation
+    Animated.loop(
+      Animated.timing(rotation, {
+        toValue: 1,
+        duration: 2000,
+        useNativeDriver: true, // Use native driver for better performance
+      })
+    ).start();
+  };
+  const rotationInterpolate = rotation.interpolate({
+    inputRange: [0, 1],
+    outputRange: ['0deg', '360deg'] // Rotation from 0 to 360 degrees
+  });
 
   return (
     <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={styles.container}>
         <Text style={styles.title}>Welcome Back!</Text>
+
+        <Animated.Image
+        source={require('./log.png')}
+        style={[styles.logo, { transform: [{ rotate: rotationInterpolate }] }]}
+      />
         <TextInput
         placeholder="Username"
         value={username}
@@ -104,7 +130,13 @@ const styles = StyleSheet.create({
       fontWeight: 'bold',
       marginBottom: 20,
       color: '#333'
-    }
+    },
+    logo: {
+      width: 100,
+      height: 100,
+      marginBottom: 20,
+      borderRadius: 50, // Half of width/height to make it round
+    },
   });
   
   export default LoginScreen;
