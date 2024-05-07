@@ -75,7 +75,7 @@ const ChatScreen = () => {
         setBergabung(username);
         setTimeout(() => {
           setBergabung('');
-        }, 1900);
+        }, 5900);
         
         playNotificationSound('https://cdn.pixabay.com/audio/2024/02/06/audio_4d73e45600.mp3');
         displayNotification(username + ' bergabung ke dalam chat');

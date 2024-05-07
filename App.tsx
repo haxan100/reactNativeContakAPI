@@ -34,7 +34,7 @@ function MainTabNavigator() {
           }else if (route.name === 'Import') {
             iconName = focused ? 'upload' : 'upload';
           }else if (route.name === 'Chat') {
-            iconName = focused ? 'Chat' : 'Chat';
+            iconName = focused ? 'commenting' : 'commenting';
           }
           return <Icon name={iconName} size={size} color={color} />;
         },
