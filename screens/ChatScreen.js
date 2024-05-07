@@ -4,8 +4,10 @@ import { io } from 'socket.io-client';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 // import jwtDecode from 'jsonwebtoken'; // Import pustaka jsonwebtoken
 import {jwtDecode} from 'jwt-decode'; // Impor jwt-decode
+import Sound from 'react-native-sound';
 
 const ChatScreen = () => {
+  
   const [socket, setSocket] = useState(null);
   const [username, setUsername] = useState('');
   const [message, setMessage] = useState('');
@@ -14,7 +16,20 @@ const ChatScreen = () => {
   const [userLogin, setUserLogin] = useState('');
 
   const scrollViewRef = useRef(); // Tambahkan referensi untuk ScrollView
-
+  const playNotificationSound = (url) => {
+    const sound = new Sound(url, null, (error) => {
+      if (error) {
+        console.error('Gagal memuat suara:', error);
+        return;
+      }
+      // Mulai memainkan audio
+      sound.play((success) => {
+        if (!success) {
+          console.error('Gagal memainkan suara notifikasi');
+        }
+      });
+    });
+  };
   useEffect(() => {
     // Inisialisasi socket
     const newSocket = io('http://103.127.135.203:8080'); // Ganti dengan alamat server Anda
@@ -39,6 +54,7 @@ const ChatScreen = () => {
     const decodedToken = jwtDecode(token);
     console.log("Decoded Token:", decodedToken);
     setUserLogin(decodedToken.username)
+
   } catch (error) {
     console.error('Error decoding tokenxxx:', error);
   }
@@ -49,6 +65,9 @@ const ChatScreen = () => {
     if (socket) {
       // Pastikan hanya ada satu event listener per event
       socket.off('chat message').on('chat message', (data) => {
+        if(data.sender!=userLogin){
+          playNotificationSound('https://cdn.pixabay.com/audio/2022/01/07/audio_ea449d6cea.mp3');
+        }
         addMessageToList(data);
       });
 
@@ -57,6 +76,8 @@ const ChatScreen = () => {
         setTimeout(() => {
           setBergabung('');
         }, 1900);
+        
+        playNotificationSound('https://cdn.pixabay.com/audio/2024/02/06/audio_4d73e45600.mp3');
         displayNotification(username + ' bergabung ke dalam chat');
       });
     }
