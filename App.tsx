@@ -14,6 +14,7 @@ import HomeScreen from './screens/HomeScreen';  // Pastikan file ini ada dan ben
 import ProfileScreen from './screens/ProfileScreen';  // Pastikan file ini ada dan benar
 import RegisterScreen from './screens/RegisterScreen';  // Pastikan file ini ada dan benar
 import ImportExcelScreen from './screens/ImportExcelScreen';
+import ChatScreen from './screens/ChatScreen';
 
 const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -32,6 +33,8 @@ function MainTabNavigator() {
             iconName = focused ? 'user' : 'user';
           }else if (route.name === 'Import') {
             iconName = focused ? 'upload' : 'upload';
+          }else if (route.name === 'Chat') {
+            iconName = focused ? 'Chat' : 'Chat';
           }
           return <Icon name={iconName} size={size} color={color} />;
         },
@@ -45,6 +48,7 @@ function MainTabNavigator() {
       <Tab.Screen name="Contacts" component={ContactListScreen} options={{ headerShown: false }} />
       <Tab.Screen name="Import" component={ImportExcelScreen} options={{ headerShown: false }} />
       <Tab.Screen name="Profile" component={ProfileScreen} options={{ headerShown: false }} />
+      <Tab.Screen name="Chat" component={ChatScreen} options={{ headerShown: false }} />
     </Tab.Navigator>
   );
 }
